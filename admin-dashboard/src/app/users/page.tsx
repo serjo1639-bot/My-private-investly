@@ -36,25 +36,6 @@ const STATUS_OPTIONS = [
   { value: 'banned', label: 'Banned' },
 ];
 
-// ── Mock fallback data used when the backend is offline ───────────────────────
-
-const GENDERS = ['male', 'female', 'other'] as const;
-const LOCATIONS = ['Tripoli, Libya', 'Benghazi, Libya', 'Misrata, Libya', 'Zawiya, Libya', 'Sabha, Libya', 'Zliten, Libya'];
-
-const MOCK_USERS: User[] = Array.from({ length: 30 }, (_, i) => ({
-  id: `user-${i + 1}`,
-  name: ['Ahmad Al-Mansouri', 'Fatima Zahra', 'Mahmoud Ibrahim', 'Sara Ali', 'Khaled Hassan', 'Omar Said'][i % 6],
-  email: `user${i + 1}@example.com`,
-  phone: `+218 91 ${String(1000000 + i).slice(1)}`,
-  role: (['investor', 'investor', 'owner', 'investor', 'admin'] as User['role'][])[i % 5],
-  age: 22 + (i % 20),
-  gender: GENDERS[i % 3],
-  location: LOCATIONS[i % 6],
-  passportUrl: null,
-  status: (['active', 'active', 'active', 'suspended', 'banned'] as Array<'active' | 'suspended' | 'banned'>)[i % 5],
-  walletBalance: Math.floor(Math.random() * 50000),
-  createdAt: new Date(Date.now() - i * 3 * 86400000).toISOString(),
-}));
 
 // ── Page component ────────────────────────────────────────────────────────────
 
@@ -94,14 +75,8 @@ export default function UsersPage() {
       setUsers(res.data ?? []);
       setTotal(res.total ?? 0);
     } catch {
-      const filtered = MOCK_USERS.filter((u) => {
-        if (search && !u.name.toLowerCase().includes(search.toLowerCase()) && !u.email.toLowerCase().includes(search.toLowerCase())) return false;
-        if (roleFilter && u.role !== roleFilter) return false;
-        if (statusFilter && u.status !== statusFilter) return false;
-        return true;
-      });
-      setTotal(filtered.length);
-      setUsers(filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE));
+      setUsers([]);
+      setTotal(0);
     } finally {
       setLoading(false);
     }

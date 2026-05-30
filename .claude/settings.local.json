@@ -3,7 +3,31 @@
     "allow": [
       "Bash(where psql *)",
       "Read(//c/Program Files/PostgreSQL/**)",
-      "Read(//c/Program Files/**)"
+      "Read(//c/Program Files/**)",
+      "Bash(dotnet build *)",
+      "Bash(npx tsc *)",
+      "Bash(dotnet script *)",
+      "Bash(dotnet --list-runtimes)",
+      "PowerShell(psql *)",
+      "Bash(PGPASSWORD=123456 C:\\\\Program Files\\\\PostgreSQL\\\\15\\\\bin\\\\psql.exe *)",
+      "Bash(dotnet run *)",
+      "Bash(curl *)",
+      "Bash(dotnet-script --version)",
+      "PowerShell(Get-NetTCPConnection *)",
+      "PowerShell(Stop-Process *)",
+      "PowerShell(claude mcp *)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\seraj\\\\OneDrive\\\\Desktop\\\\مشروع التخرج\\\\project_code\" -Recurse -Directory)",
+      "Bash(Select-Object -First 30)",
+      "Bash(grep -E \"\\\\.\\(cs|py|java|ts|js\\)$\")",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\seraj\\\\source\\\\repos\\\\investly_backendproject\" -Recurse -Filter \"*Controller.cs\")",
+      "Bash(Select-Object FullName)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\seraj\\\\source\\\\repos\\\\investly_backendproject\" -Recurse -Directory)",
+      "Bash(Select-Object -First 20)",
+      "Bash(Format-Table FullName)",
+      "WebSearch",
+      "Read(//c/Users/seraj/source/repos/investly_backendproject/**)",
+      "Bash(ls documentation *)",
+      "Bash(ls setup-guide *)"
     ]
   }
 }

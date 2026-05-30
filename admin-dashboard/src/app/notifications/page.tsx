@@ -45,26 +45,6 @@ const TYPE_COLORS: Record<string, string> = {
   user:       'bg-teal-light text-teal',
 };
 
-// ── Mock fallback notifications shown when the API is offline ─────────────────
-
-const MOCK_NOTIFICATIONS: Notification[] = [
-  { id: '1', type: 'investment', titleEn: 'New Investment',    titleAr: 'استثمار جديد',     messageEn: 'Ahmad invested 5,000 LYD in Tech Platform',       messageAr: 'أحمد استثمر 5000 د.ل في المنصة التقنية', isRead: false, createdAt: new Date(Date.now() - 5 * 60000).toISOString() },
-  { id: '2', type: 'project',    titleEn: 'Project Submitted', titleAr: 'تم تقديم مشروع',   messageEn: 'New project "AI Platform" submitted for review',   messageAr: 'تم تقديم مشروع جديد للمراجعة',            isRead: false, createdAt: new Date(Date.now() - 30 * 60000).toISOString() },
-  { id: '3', type: 'user',       titleEn: 'New Registration',  titleAr: 'تسجيل جديد',       messageEn: 'Fatima Zahra registered as investor',             messageAr: 'فاطمة زهراء سجلت كمستثمرة',               isRead: true,  createdAt: new Date(Date.now() - 2 * 3600000).toISOString() },
-  { id: '4', type: 'system',     titleEn: 'Payment Failed',    titleAr: 'فشل الدفع',         messageEn: 'Payment of 2,500 LYD failed for user Khaled',     messageAr: 'فشل دفع 2500 د.ل للمستخدم خالد',          isRead: true,  createdAt: new Date(Date.now() - 5 * 3600000).toISOString() },
-  { id: '5', type: 'investment', titleEn: 'Goal Reached',      titleAr: 'الهدف تم بلوغه',   messageEn: 'Project "Smart Education" reached its funding goal', messageAr: 'وصل مشروع التعليم الذكي لهدفه',         isRead: true,  createdAt: new Date(Date.now() - 86400000).toISOString() },
-];
-
-// ── Mock users used for the user-search dropdown when the API is offline ──────
-
-const MOCK_USERS_SEARCH: User[] = [
-  { id: 'u1', name: 'Ahmad Al-Mansouri', email: 'ahmad@example.com',   phone: '+218 91 1234567', role: 'investor', type: 'individual' },
-  { id: 'u2', name: 'Fatima Zahra',      email: 'fatima@example.com',  phone: '+218 92 2345678', role: 'investor', type: 'individual' },
-  { id: 'u3', name: 'Mahmoud Ibrahim',   email: 'mahmoud@example.com', phone: '+218 91 3456789', role: 'owner',    type: 'organization' },
-  { id: 'u4', name: 'Sara Ali',          email: 'sara@example.com',    phone: '+218 92 4567890', role: 'owner',    type: 'individual' },
-  { id: 'u5', name: 'Khaled Hassan',     email: 'khaled@example.com',  phone: '+218 91 5678901', role: 'investor', type: 'individual' },
-  { id: 'u6', name: 'Omar Said',         email: 'omar@example.com',    phone: '+218 92 6789012', role: 'investor', type: 'individual' },
-];
 
 // ── Form state type ───────────────────────────────────────────────────────────
 
@@ -85,7 +65,7 @@ const EMPTY_FORM: SendForm = {
 // ── Page component ────────────────────────────────────────────────────────────
 
 export default function NotificationsPage() {
-  const [notifications, setNotifications] = useState<Notification[]>(MOCK_NOTIFICATIONS);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(false);
   const [showSendModal, setShowSendModal] = useState(false);
   const [sending, setSending] = useState(false);
@@ -110,7 +90,7 @@ export default function NotificationsPage() {
     setLoading(true);
     notificationsApi.getAll()
       .then(setNotifications)
-      .catch(() => setNotifications(MOCK_NOTIFICATIONS))
+      .catch(() => setNotifications([]))
       .finally(() => setLoading(false));
   }, []);
 
@@ -138,13 +118,7 @@ export default function NotificationsPage() {
       const res = await usersApi.getAllUsers({ search: query, pageSize: 8 });
       setUserResults(res.data ?? []);
     } catch {
-      // Fall back to filtering the mock list client-side
-      const q = query.toLowerCase();
-      setUserResults(
-        MOCK_USERS_SEARCH.filter(
-          (u) => u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q)
-        )
-      );
+      setUserResults([]);
     } finally {
       setUserSearching(false);
     }

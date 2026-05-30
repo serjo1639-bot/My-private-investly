@@ -11,6 +11,7 @@ import { SearchInput } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Button } from '@/components/ui/Button';
 import { ConfirmDialog } from '@/components/ui/Modal';
+import { NewProjectModal } from '@/components/projects/NewProjectModal';
 import { projectsApi } from '@/lib/api/projects';
 import { Project } from '@/types';
 import { formatDate, formatCurrency, getCategoryLabel, extractError } from '@/lib/utils';
@@ -44,17 +45,6 @@ const STATUS_OPTIONS = [
   { value: 'rejected', label: 'Rejected' },
 ];
 
-// Mock data fallback
-const MOCK_PROJECTS: Project[] = [
-  { id: 'p1', titleEn: 'Advanced Tech Platform', titleAr: 'منصة تقنية متقدمة', category: 'tech', status: 'active', goal: 500000, raised: 320000, minInvestment: 1000, ownerName: 'Mahmoud Ibrahim', cityEn: 'Tripoli', investorsCount: 64, createdAt: new Date(Date.now() - 30 * 86400000).toISOString() },
-  { id: 'p2', titleEn: 'AI Business Intelligence', titleAr: 'ذكاء اصطناعي للأعمال', category: 'tech', status: 'pending', goal: 750000, raised: 0, minInvestment: 2000, ownerName: 'Sara Ali', cityEn: 'Benghazi', investorsCount: 0, createdAt: new Date(Date.now() - 5 * 86400000).toISOString() },
-  { id: 'p3', titleEn: 'Smart Education Platform', titleAr: 'منصة تعليمية ذكية', category: 'edu', status: 'active', goal: 300000, raised: 285000, minInvestment: 500, ownerName: 'Khaled Hassan', cityEn: 'Misrata', investorsCount: 130, createdAt: new Date(Date.now() - 60 * 86400000).toISOString() },
-  { id: 'p4', titleEn: 'Supply Chain Management', titleAr: 'إدارة سلسلة التوريد', category: 'tech', status: 'completed', goal: 200000, raised: 200000, minInvestment: 1000, ownerName: 'Ahmad Al-Mansouri', cityEn: 'Zawiya', investorsCount: 45, createdAt: new Date(Date.now() - 90 * 86400000).toISOString() },
-  { id: 'p5', titleEn: 'Digital Health App', titleAr: 'تطبيق صحة رقمية', category: 'health', status: 'active', goal: 400000, raised: 180000, minInvestment: 500, ownerName: 'Fatima Zahra', cityEn: 'Sabha', investorsCount: 72, createdAt: new Date(Date.now() - 45 * 86400000).toISOString() },
-  { id: 'p6', titleEn: 'Local E-Commerce Platform', titleAr: 'منصة تجارة إلكترونية', category: 'tech', status: 'pending', goal: 600000, raised: 0, minInvestment: 1500, ownerName: 'Omar Said', cityEn: 'Tripoli', investorsCount: 0, createdAt: new Date(Date.now() - 2 * 86400000).toISOString() },
-  { id: 'p7', titleEn: 'Green Energy Project', titleAr: 'مشروع طاقة خضراء', category: 'energy', status: 'active', goal: 1000000, raised: 650000, minInvestment: 5000, ownerName: 'Ali Hassan', cityEn: 'Tripoli', investorsCount: 28, createdAt: new Date(Date.now() - 120 * 86400000).toISOString() },
-  { id: 'p8', titleEn: 'Agricultural Innovation', titleAr: 'ابتكار زراعي', category: 'agri', status: 'rejected', goal: 250000, raised: 0, minInvestment: 1000, ownerName: 'Nadia Ibrahim', cityEn: 'Sebha', investorsCount: 0, createdAt: new Date(Date.now() - 20 * 86400000).toISOString() },
-];
 
 export default function ProjectsPage() {
   const router = useRouter();
@@ -69,6 +59,7 @@ export default function ProjectsPage() {
   const [rejectTarget, setRejectTarget] = useState<Project | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Project | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
   const [error, setError] = useState('');
 
   const fetchProjects = useCallback(async () => {
@@ -84,12 +75,8 @@ export default function ProjectsPage() {
       setProjects(res.data ?? []);
       setTotal(res.total ?? 0);
     } catch {
-      let filtered = MOCK_PROJECTS;
-      if (search) filtered = filtered.filter((p) => p.titleEn.toLowerCase().includes(search.toLowerCase()));
-      if (categoryFilter) filtered = filtered.filter((p) => p.category === categoryFilter);
-      if (statusFilter) filtered = filtered.filter((p) => p.status === statusFilter);
-      setTotal(filtered.length);
-      setProjects(filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE));
+      setProjects([]);
+      setTotal(0);
     } finally {
       setLoading(false);
     }
@@ -259,7 +246,7 @@ export default function ProjectsPage() {
               <h1 className="text-2xl font-bold text-text-primary">Project Management</h1>
               <p className="text-sm text-text-muted mt-1">{total} total projects</p>
             </div>
-            <Button icon={<Plus size={16} />}>New Project</Button>
+            <Button icon={<Plus size={16} />} onClick={() => setCreateOpen(true)}>New Project</Button>
           </div>
         </div>
 
@@ -289,6 +276,16 @@ export default function ProjectsPage() {
         <ConfirmDialog isOpen={!!approveTarget} onClose={() => setApproveTarget(null)} onConfirm={handleApprove} title="Approve Project" message={`Approve "${approveTarget?.titleEn}" and make it visible to investors?`} confirmLabel="Approve" confirmVariant="primary" loading={actionLoading} />
         <ConfirmDialog isOpen={!!rejectTarget} onClose={() => setRejectTarget(null)} onConfirm={handleReject} title="Reject Project" message={`Reject "${rejectTarget?.titleEn}"? The owner will be notified.`} confirmLabel="Reject" loading={actionLoading} />
         <ConfirmDialog isOpen={!!deleteTarget} onClose={() => setDeleteTarget(null)} onConfirm={handleDelete} title="Delete Project" message={`Permanently delete "${deleteTarget?.titleEn}"? This cannot be undone.`} confirmLabel="Delete" loading={actionLoading} />
+
+        <NewProjectModal
+          isOpen={createOpen}
+          onClose={() => setCreateOpen(false)}
+          onCreated={() => {
+            setCreateOpen(false);
+            setPage(1);
+            fetchProjects();
+          }}
+        />
       </DashboardLayout>
     </ProtectedRoute>
   );
