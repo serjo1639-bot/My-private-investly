@@ -13,9 +13,11 @@ import {
   Text, Avatar, IconButton, Card, Button, Chip,
   SectionHeader, ProjectCard, Skeleton, SkeletonCard, EmptyState,
 } from '../../components';
+import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../hooks/useTheme';
 import { useAuth } from '../../hooks/useAuth';
 import { useUiStore } from '../../store/uiStore';
+import { useAppSettings } from '../../hooks/useAppSettings';
 import { useFeaturedProjects, useCategories } from '../../hooks/useProjects';
 import { useWallet } from '../../hooks/useWallet';
 import { useUnreadCount } from '../../hooks/useNotifications';
@@ -24,7 +26,7 @@ import { ROUTES } from '../../navigation/routes';
 import { queryKeys } from '../../constants/queryKeys';
 
 export default function HomeScreen({ navigation }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const theme = useTheme();
   const { user } = useAuth();
   const openDrawer = useUiStore((s) => s.openDrawer);
@@ -34,7 +36,13 @@ export default function HomeScreen({ navigation }) {
   const categories = useCategories();
   const wallet = useWallet();
   const unread = useUnreadCount();
+  const appSettings = useAppSettings();
   const [refreshing, setRefreshing] = useState(false);
+
+  const settings = appSettings.data;
+  const isAr = (i18n.language || 'ar').startsWith('ar');
+  const announcement = isAr ? settings?.announcementAr : settings?.announcementEn;
+  const showAnnouncement = settings?.announcementActive && !!announcement;
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -65,6 +73,14 @@ export default function HomeScreen({ navigation }) {
             <Avatar uri={user?.avatarUrl} name={user?.name} size={42} style={{ marginLeft: 10 }} />
           </View>
         </View>
+
+        {/* Admin announcement banner (controlled from the dashboard) */}
+        {showAnnouncement && (
+          <View style={[styles.announcement, { backgroundColor: theme.colors.primary + '14', borderColor: theme.colors.primary + '33' }]}>
+            <Ionicons name="megaphone-outline" size={18} color={theme.colors.primary} style={{ marginTop: 1 }} />
+            <Text variant="caption" color="textSecondary" style={styles.announcementText}>{announcement}</Text>
+          </View>
+        )}
 
         {/* Wallet balance card */}
         <Card elevation="md" style={[styles.walletCard, { backgroundColor: theme.colors.primary }]}>
@@ -130,6 +146,8 @@ const styles = StyleSheet.create({
   menuBtn: { marginLeft: -8, marginRight: 4 },
   greetWrap: { flex: 1 },
   headerActions: { flexDirection: 'row', alignItems: 'center' },
+  announcement: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, padding: 12, borderRadius: 14, borderWidth: 1, marginTop: 4 },
+  announcementText: { flex: 1, lineHeight: 18 },
   walletCard: { marginTop: 8, borderWidth: 0 },
   walletAmount: { color: '#fff', marginTop: 6 },
   walletActions: { flexDirection: 'row', marginTop: 18 },

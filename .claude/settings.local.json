@@ -27,7 +27,14 @@
       "WebSearch",
       "Read(//c/Users/seraj/source/repos/investly_backendproject/**)",
       "Bash(ls documentation *)",
-      "Bash(ls setup-guide *)"
+      "Bash(ls setup-guide *)",
+      "Bash(netstat -ano)",
+      "Bash(findstr LISTENING)",
+      "Bash(findstr \":3000 :3001 :8081 :5000 :5001 :7\")",
+      "Bash(findstr env *)",
+      "PowerShell(Get-NetIPAddress -AddressFamily IPv4 | Where-Object { $_.IPAddress -notmatch '^127\\\\.|^169\\\\.254\\\\.' -and $_.PrefixOrigin -ne 'WellKnown' } | Select-Object IPAddress,InterfaceAlias | Format-Table -AutoSize)",
+      "PowerShell(dotnet --version; Write-Output \"---\"; Test-Path \"C:\\\\Users\\\\seraj\\\\source\\\\repos\\\\investly_backendproject\\\\investly_backendproject.csproj\")",
+      "PowerShell(dotnet build *)"
     ]
   }
 }

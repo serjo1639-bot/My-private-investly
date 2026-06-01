@@ -18,13 +18,9 @@ import { projectsApi } from '@/lib/api/projects';
 import { Project } from '@/types';
 import { extractError } from '@/lib/utils';
 
+// Platform policy: Technology is the only project category.
 const CATEGORY_OPTIONS = [
   { value: 'tech', label: 'Technology' },
-  { value: 'energy', label: 'Renewable Energy' },
-  { value: 'agri', label: 'Agriculture' },
-  { value: 'health', label: 'Health' },
-  { value: 'edu', label: 'Education' },
-  { value: 'realestate', label: 'Real Estate' },
 ];
 
 interface NewProjectModalProps {

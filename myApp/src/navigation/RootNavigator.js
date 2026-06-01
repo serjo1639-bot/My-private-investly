@@ -15,12 +15,14 @@ import { ActivityIndicator } from 'react-native';
 import { useTheme } from '../hooks/useTheme';
 import { useAuthStore } from '../store/authStore';
 import { useUiStore } from '../store/uiStore';
+import { useAppSettings } from '../hooks/useAppSettings';
 import { changeLanguage } from '../i18n';
 import { Logo } from '../components/ui/Logo';
 import { AuthStack } from './AuthStack';
 import { AppStack } from './AppStack';
 import { AppDrawer } from './AppDrawer';
 import { navigationRef } from './navigationRef';
+import MaintenanceScreen from '../screens/system/MaintenanceScreen';
 
 export function RootNavigator() {
   const theme = useTheme();
@@ -29,6 +31,7 @@ export function RootNavigator() {
   const hydrateAuth = useAuthStore((s) => s.hydrate);
   const hydrateUi = useUiStore((s) => s.hydrate);
   const language = useUiStore((s) => s.language);
+  const appSettings = useAppSettings();
 
   useEffect(() => {
     hydrateUi();
@@ -61,6 +64,17 @@ export function RootNavigator() {
         <Logo size={72} showWordmark={false} />
         <ActivityIndicator color={theme.colors.primary} style={{ marginTop: 28 }} />
       </View>
+    );
+  }
+
+  // Admin-controlled kill switch: block the whole app when maintenance is on.
+  if (appSettings.data?.maintenanceMode) {
+    return (
+      <MaintenanceScreen
+        settings={appSettings.data}
+        onRetry={() => appSettings.refetch()}
+        retrying={appSettings.isFetching}
+      />
     );
   }
 

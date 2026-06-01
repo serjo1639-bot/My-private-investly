@@ -14,7 +14,7 @@ import { ConfirmDialog } from '@/components/ui/Modal';
 import { NewProjectModal } from '@/components/projects/NewProjectModal';
 import { projectsApi } from '@/lib/api/projects';
 import { Project } from '@/types';
-import { formatDate, formatCurrency, getCategoryLabel, extractError } from '@/lib/utils';
+import { formatDate, formatCurrency, getCategoryLabel, extractError, exportToCsv } from '@/lib/utils';
 import {
   CheckCircle,
   XCircle,
@@ -22,18 +22,15 @@ import {
   Trash2,
   RefreshCw,
   Plus,
+  Download,
 } from 'lucide-react';
 
 const PAGE_SIZE = 15;
 
+// Platform policy: Technology is the only category.
 const CATEGORY_OPTIONS = [
   { value: '', label: 'All Categories' },
   { value: 'tech', label: 'Technology' },
-  { value: 'energy', label: 'Renewable Energy' },
-  { value: 'agri', label: 'Agriculture' },
-  { value: 'health', label: 'Health' },
-  { value: 'edu', label: 'Education' },
-  { value: 'realestate', label: 'Real Estate' },
 ];
 
 const STATUS_OPTIONS = [
@@ -127,6 +124,21 @@ export default function ProjectsPage() {
     } finally {
       setActionLoading(false);
     }
+  };
+
+  const handleExport = () => {
+    exportToCsv<Project>('projects', [
+      { header: 'Title (EN)', value: (p) => p.titleEn },
+      { header: 'Title (AR)', value: (p) => p.titleAr },
+      { header: 'Category', value: (p) => getCategoryLabel(p.category) },
+      { header: 'Status', value: (p) => p.status },
+      { header: 'Goal', value: (p) => p.goal },
+      { header: 'Raised', value: (p) => p.raised },
+      { header: 'Investors', value: (p) => p.investorsCount ?? 0 },
+      { header: 'Owner', value: (p) => p.ownerName ?? '' },
+      { header: 'City', value: (p) => p.cityEn ?? '' },
+      { header: 'Submitted', value: (p) => formatDate(p.createdAt) },
+    ], projects);
   };
 
   const columns = [
@@ -246,7 +258,10 @@ export default function ProjectsPage() {
               <h1 className="text-2xl font-bold text-text-primary">Project Management</h1>
               <p className="text-sm text-text-muted mt-1">{total} total projects</p>
             </div>
-            <Button icon={<Plus size={16} />} onClick={() => setCreateOpen(true)}>New Project</Button>
+            <div className="flex gap-2">
+              <Button variant="outline" icon={<Download size={16} />} onClick={handleExport} disabled={projects.length === 0}>Export CSV</Button>
+              <Button icon={<Plus size={16} />} onClick={() => setCreateOpen(true)}>New Project</Button>
+            </div>
           </div>
         </div>
 

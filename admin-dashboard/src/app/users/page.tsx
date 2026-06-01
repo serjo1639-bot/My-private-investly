@@ -15,8 +15,8 @@ import { Modal } from '@/components/ui/Modal';
 import { ConfirmDialog } from '@/components/ui/Modal';
 import { usersApi } from '@/lib/api/users';
 import { User } from '@/types';
-import { formatDate, formatCurrency, extractError } from '@/lib/utils';
-import { UserPlus, Ban, Trash2, Eye, RefreshCw, UserX, AlertTriangle } from 'lucide-react';
+import { formatDate, formatCurrency, extractError, exportToCsv } from '@/lib/utils';
+import { UserPlus, Ban, Trash2, Eye, RefreshCw, UserX, AlertTriangle, Download } from 'lucide-react';
 
 const PAGE_SIZE = 15;
 
@@ -145,6 +145,19 @@ export default function UsersPage() {
     }
   };
 
+  const handleExport = () => {
+    exportToCsv<User>('users', [
+      { header: 'Name', value: (u) => u.name },
+      { header: 'Email', value: (u) => u.email },
+      { header: 'Phone', value: (u) => u.phone ?? '' },
+      { header: 'Role', value: (u) => u.role },
+      { header: 'Status', value: (u) => u.status ?? 'active' },
+      { header: 'Location', value: (u) => u.location ?? '' },
+      { header: 'Wallet Balance', value: (u) => u.walletBalance ?? 0 },
+      { header: 'Joined', value: (u) => formatDate(u.createdAt) },
+    ], users);
+  };
+
   // ── Table columns ─────────────────────────────────────────────────────────
 
   const columns = [
@@ -248,7 +261,10 @@ export default function UsersPage() {
             <h1 className="text-2xl font-bold text-text-primary">User Management</h1>
             <p className="text-sm text-text-muted mt-1">{total.toLocaleString()} registered users</p>
           </div>
-          <Button icon={<UserPlus size={16} />}>Add User</Button>
+          <div className="flex gap-2">
+            <Button variant="outline" icon={<Download size={16} />} onClick={handleExport} disabled={users.length === 0}>Export CSV</Button>
+            <Button icon={<UserPlus size={16} />}>Add User</Button>
+          </div>
         </div>
 
         {error && (

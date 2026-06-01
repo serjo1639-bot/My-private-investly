@@ -27,6 +27,7 @@ import {
   X,
   Search,
   Loader2,
+  Trash2,
 } from 'lucide-react';
 
 // ── Icon and colour maps keyed by notification type ───────────────────────────
@@ -156,6 +157,24 @@ export default function NotificationsPage() {
     );
   };
 
+  // ── Delete a notification (admin → removed for everyone, incl. mobile) ────────
+
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<Notification | null>(null);
+
+  const handleDelete = async (notif: Notification) => {
+    setDeletingId(notif.id);
+    try {
+      await notificationsApi.deleteNotification(notif.id);
+      setNotifications((prev) => prev.filter((n) => n.id !== notif.id));
+    } catch {
+      // Keep the row if the request failed; the admin can retry.
+    } finally {
+      setDeletingId(null);
+      setConfirmDelete(null);
+    }
+  };
+
   // ── Send notification ─────────────────────────────────────────────────────────
 
   const handleSend = async () => {
@@ -269,10 +288,24 @@ export default function NotificationsPage() {
                           <p className={`text-sm font-medium ${notif.isRead ? 'text-text-secondary' : 'text-text-primary'}`}>
                             {notif.titleEn}
                           </p>
-                          {/* Blue dot for unread */}
-                          {!notif.isRead && (
-                            <span className="w-2 h-2 bg-primary rounded-full flex-shrink-0 mt-1.5" />
-                          )}
+                          <div className="flex items-center gap-2 flex-shrink-0 mt-1">
+                            {/* Blue dot for unread */}
+                            {!notif.isRead && (
+                              <span className="w-2 h-2 bg-primary rounded-full" />
+                            )}
+                            {/* Delete — removes for every user (incl. mobile) */}
+                            <button
+                              type="button"
+                              title="Delete for everyone"
+                              onClick={(e) => { e.stopPropagation(); setConfirmDelete(notif); }}
+                              disabled={deletingId === notif.id}
+                              className="w-7 h-7 flex items-center justify-center rounded-lg text-text-muted hover:text-danger hover:bg-danger-light transition-colors disabled:opacity-50"
+                            >
+                              {deletingId === notif.id
+                                ? <Loader2 size={14} className="animate-spin" />
+                                : <Trash2 size={14} />}
+                            </button>
+                          </div>
                         </div>
                         <p className="text-xs text-text-muted mt-0.5 line-clamp-2">{notif.messageEn}</p>
                         <p className="text-[10px] text-text-light mt-1">{getRelativeTime(notif.createdAt)}</p>
@@ -542,6 +575,35 @@ export default function NotificationsPage() {
               </div>
             </div>
           </div>
+        </Modal>
+
+        {/* ── Confirm delete modal ──────────────────────────────────────────────── */}
+        <Modal
+          isOpen={!!confirmDelete}
+          onClose={() => setConfirmDelete(null)}
+          title="Delete Notification"
+          size="sm"
+          footer={
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setConfirmDelete(null)}>Cancel</Button>
+              <Button
+                variant="danger"
+                icon={<Trash2 size={14} />}
+                loading={deletingId === confirmDelete?.id}
+                onClick={() => confirmDelete && handleDelete(confirmDelete)}
+              >
+                Delete for Everyone
+              </Button>
+            </div>
+          }
+        >
+          <p className="text-sm text-text-secondary">
+            This permanently deletes{' '}
+            <span className="font-semibold text-text-primary">
+              &ldquo;{confirmDelete?.titleEn}&rdquo;
+            </span>{' '}
+            for all users. It will also disappear from their mobile app. This action cannot be undone.
+          </p>
         </Modal>
       </DashboardLayout>
     </ProtectedRoute>

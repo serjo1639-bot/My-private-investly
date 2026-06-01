@@ -48,7 +48,7 @@ export const projectsApi = {
   },
 
   deleteProject: async (projectId: string): Promise<void> => {
-    await apiClient.delete(`/projects/${projectId}`);
+    await apiClient.delete(`/admin/projects/${projectId}`);
   },
 
   approveProject: async (projectId: string): Promise<void> => {

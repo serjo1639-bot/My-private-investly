@@ -70,4 +70,7 @@ export const endpoints = {
     upload: '/media/upload',
     byId: (id) => `/media/${id}`,
   },
+  appSettings: {
+    get: '/app-settings', // public — admin-controlled remote settings
+  },
 };

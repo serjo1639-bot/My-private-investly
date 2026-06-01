@@ -48,7 +48,7 @@ export const usersApi = {
   },
 
   deleteUser: async (userId: string): Promise<void> => {
-    await apiClient.delete(`/users/${userId}`);
+    await apiClient.delete(`/admin/users/${userId}`);
   },
 
   banUser: async (userId: string): Promise<void> => {
