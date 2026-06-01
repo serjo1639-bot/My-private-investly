@@ -1,0 +1,6 @@
+@investly_backendproject_HostAddress = http://localhost:5231
+
+GET {{investly_backendproject_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

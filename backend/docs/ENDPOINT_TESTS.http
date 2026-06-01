@@ -1,0 +1,914 @@
+# Investly API — Endpoint Tests
+# Use with VS Code REST Client extension or JetBrains HTTP Client
+# Run the API first: dotnet run (from project root)
+#
+# STEP 1: Run "Login as Admin" below and copy the token into @token
+# STEP 2: Run any other request
+
+@baseUrl = http://localhost:5000/api
+@token = PASTE_YOUR_TOKEN_HERE
+@refreshToken = PASTE_YOUR_REFRESH_TOKEN_HERE
+@userId = PASTE_USER_ID_HERE
+@projectId = PASTE_PROJECT_ID_HERE
+@investmentId = PASTE_INVESTMENT_ID_HERE
+@paymentId = PASTE_PAYMENT_ID_HERE
+@notificationId = PASTE_NOTIFICATION_ID_HERE
+@mediaId = PASTE_MEDIA_ID_HERE
+@ownerId = PASTE_OWNER_ID_HERE
+
+###############################################################################
+# AUTH
+###############################################################################
+
+### Login as Admin
+POST {{baseUrl}}/auth/login-email
+Content-Type: application/json
+
+{
+  "email": "admin@investly.ly",
+  "password": "Admin@2024!",
+  "role": "admin"
+}
+
+---
+
+### Login as Investor (phone)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "phone": "+218910000000",
+  "password": "MyPassword123",
+  "role": "investor"
+}
+
+---
+
+### Login as Owner (email)
+POST {{baseUrl}}/auth/login-email
+Content-Type: application/json
+
+{
+  "email": "owner@example.com",
+  "password": "MyPassword123",
+  "role": "owner"
+}
+
+---
+
+### Register new Investor
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "Ahmed Ali",
+  "phone": "+218910000001",
+  "email": "ahmed@example.com",
+  "role": "investor",
+  "password": "SecurePass123!",
+  "age": 28,
+  "gender": "male",
+  "location": "Tripoli",
+  "termsAccepted": true
+}
+
+---
+
+### Register new Owner
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "Sara Khalil",
+  "phone": "+218910000002",
+  "email": "sara@example.com",
+  "role": "owner",
+  "password": "SecurePass123!",
+  "age": 32,
+  "gender": "female",
+  "location": "Benghazi",
+  "termsAccepted": true
+}
+
+---
+
+### Send OTP to phone
+POST {{baseUrl}}/auth/send-otp
+Content-Type: application/json
+
+{
+  "phone": "+218910000001",
+  "purpose": "login"
+}
+
+---
+
+### Verify OTP
+POST {{baseUrl}}/auth/verify-otp
+Content-Type: application/json
+
+{
+  "phone": "+218910000001",
+  "code": "123456"
+}
+
+---
+
+### Forgot Password — send reset code to email
+POST {{baseUrl}}/auth/forgot-password
+Content-Type: application/json
+
+{
+  "email": "ahmed@example.com"
+}
+
+---
+
+### Verify Reset Code
+POST {{baseUrl}}/auth/verify-reset-code
+Content-Type: application/json
+
+{
+  "email": "ahmed@example.com",
+  "code": "123456"
+}
+
+---
+
+### Reset Password
+POST {{baseUrl}}/auth/reset-password
+Content-Type: application/json
+
+{
+  "email": "ahmed@example.com",
+  "code": "123456",
+  "newPassword": "NewPassword123!"
+}
+
+---
+
+### Refresh Token
+POST {{baseUrl}}/auth/refresh-token
+Content-Type: application/json
+
+{
+  "refreshToken": "{{refreshToken}}"
+}
+
+---
+
+### Logout
+POST {{baseUrl}}/auth/logout
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "refreshToken": "{{refreshToken}}"
+}
+
+---
+
+### Change Password
+POST {{baseUrl}}/auth/change-password
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "oldPassword": "MyPassword123",
+  "newPassword": "NewPassword456!"
+}
+
+---
+
+### Get My Profile
+GET {{baseUrl}}/auth/profile
+Authorization: Bearer {{token}}
+
+---
+
+### Update My Profile
+PUT {{baseUrl}}/auth/profile
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Ahmed Ali Updated",
+  "location": "Tripoli",
+  "age": 29
+}
+
+---
+
+###############################################################################
+# PROJECTS (Public — no token needed)
+###############################################################################
+
+### Get Featured Projects (home screen carousel)
+GET {{baseUrl}}/projects/featured
+
+---
+
+### Get All Projects (browsing)
+GET {{baseUrl}}/projects
+
+---
+
+### Get Projects — with filters
+GET {{baseUrl}}/projects?category=tech&search=startup&page=1&pageSize=10
+
+---
+
+### Get All Categories
+GET {{baseUrl}}/projects/categories
+
+---
+
+### Get Single Project
+GET {{baseUrl}}/projects/{{projectId}}
+
+---
+
+### Get Project Stats (funding progress)
+GET {{baseUrl}}/projects/{{projectId}}/stats
+
+---
+
+### Increment Project View Count
+POST {{baseUrl}}/projects/{{projectId}}/views
+
+---
+
+###############################################################################
+# PROJECTS (Protected — owner creates)
+###############################################################################
+
+### Create New Project (owner only)
+POST {{baseUrl}}/projects
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "titleAr": "مشروع تقني جديد",
+  "titleEn": "New Tech Project",
+  "descriptionAr": "وصف تفصيلي للمشروع بالعربية",
+  "descriptionEn": "Detailed description in English",
+  "category": "tech",
+  "cityAr": "طرابلس",
+  "cityEn": "Tripoli",
+  "imageUrl": "http://localhost:5000/uploads/project.jpg",
+  "goal": 100000,
+  "minInvestment": 500,
+  "maxInvestment": 50000,
+  "currencyCode": "LYD",
+  "duration": 12,
+  "startDate": "2026-06-01",
+  "endDate": "2027-06-01",
+  "teamSize": 5,
+  "website": "https://example.com",
+  "founderName": "Sara Khalil",
+  "founderEmail": "sara@example.com",
+  "founderPhone": "+218910000002"
+}
+
+---
+
+### Update Project
+PUT {{baseUrl}}/projects/{{projectId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "titleEn": "Updated Tech Project",
+  "descriptionEn": "Updated description"
+}
+
+---
+
+###############################################################################
+# OWNERS
+###############################################################################
+
+### Get Owner's Projects
+GET {{baseUrl}}/owners/{{ownerId}}/projects
+Authorization: Bearer {{token}}
+
+---
+
+### Get Owner Stats
+GET {{baseUrl}}/owners/{{ownerId}}/stats
+Authorization: Bearer {{token}}
+
+---
+
+### Get Owner Dashboard
+GET {{baseUrl}}/owners/{{ownerId}}/dashboard
+Authorization: Bearer {{token}}
+
+---
+
+###############################################################################
+# INVESTMENTS
+###############################################################################
+
+### Checkout — Invest in a project (wallet payment)
+POST {{baseUrl}}/investments/checkout
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "currency": "LYD",
+  "contributions": [
+    {
+      "projectId": "{{projectId}}",
+      "amount": 1000,
+      "currency": "LYD",
+      "paymentMethod": "wallet"
+    }
+  ]
+}
+
+---
+
+### Checkout — Multiple projects at once
+POST {{baseUrl}}/investments/checkout
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "currency": "LYD",
+  "contributions": [
+    {
+      "projectId": "{{projectId}}",
+      "amount": 1000,
+      "currency": "LYD",
+      "paymentMethod": "wallet"
+    },
+    {
+      "projectId": "SECOND_PROJECT_ID_HERE",
+      "amount": 500,
+      "currency": "LYD",
+      "paymentMethod": "wallet"
+    }
+  ]
+}
+
+---
+
+### Get My Active Investments
+GET {{baseUrl}}/investments/me
+Authorization: Bearer {{token}}
+
+---
+
+### Get Investment History
+GET {{baseUrl}}/investments/history
+Authorization: Bearer {{token}}
+
+---
+
+### Get Wallet Balance
+GET {{baseUrl}}/investments/wallet
+Authorization: Bearer {{token}}
+
+---
+
+### Top Up Wallet
+POST {{baseUrl}}/investments/wallet/topup
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "amount": 5000,
+  "method": "credit_card"
+}
+
+---
+
+### Withdraw from Wallet
+POST {{baseUrl}}/investments/wallet/withdraw
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "amount": 1000,
+  "bankDetails": {
+    "bankName": "Bank of Libya",
+    "accountNumber": "1234567890",
+    "accountName": "Ahmed Ali"
+  }
+}
+
+---
+
+### Get Funding Options (payment methods)
+GET {{baseUrl}}/investments/funding-options
+Authorization: Bearer {{token}}
+
+---
+
+### Redeem a Top-Up Code
+POST {{baseUrl}}/investments/topup/redeem
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "code": "TOPUP-XXXX-YYYY"
+}
+
+---
+
+###############################################################################
+# PAYMENTS
+###############################################################################
+
+### Get Payment Methods (public)
+GET {{baseUrl}}/payments/methods
+
+---
+
+### Initiate a Payment
+POST {{baseUrl}}/payments/initiate
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "amount": 2000,
+  "method": "credit_card",
+  "currency": "LYD"
+}
+
+---
+
+### Verify a Payment
+POST {{baseUrl}}/payments/verify
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "paymentId": "{{paymentId}}",
+  "transactionId": "TXN-12345"
+}
+
+---
+
+### Get Payment History
+GET {{baseUrl}}/payments/history
+Authorization: Bearer {{token}}
+
+---
+
+### Get Single Payment
+GET {{baseUrl}}/payments/{{paymentId}}
+Authorization: Bearer {{token}}
+
+---
+
+### Get Payment Status
+GET {{baseUrl}}/payments/{{paymentId}}/status
+Authorization: Bearer {{token}}
+
+---
+
+### Request a Refund
+POST {{baseUrl}}/payments/{{paymentId}}/refund
+Authorization: Bearer {{token}}
+
+---
+
+### Get Wallet Info via Payments
+GET {{baseUrl}}/payments/wallet
+Authorization: Bearer {{token}}
+
+---
+
+###############################################################################
+# USERS
+###############################################################################
+
+### Get User Profile
+GET {{baseUrl}}/users/{{userId}}
+Authorization: Bearer {{token}}
+
+---
+
+### Update User Profile
+PUT {{baseUrl}}/users/{{userId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Ahmed Ali",
+  "location": "Tripoli",
+  "age": 29
+}
+
+---
+
+### Delete Account
+DELETE {{baseUrl}}/users/{{userId}}
+Authorization: Bearer {{token}}
+
+---
+
+### Submit KYC Document
+POST {{baseUrl}}/users/{{userId}}/kyc
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "documentType": "passport",
+  "documentUrl": "http://localhost:5000/uploads/passport.jpg"
+}
+
+---
+
+### Get User Documents
+GET {{baseUrl}}/users/{{userId}}/documents
+Authorization: Bearer {{token}}
+
+---
+
+### Get User's Investments
+GET {{baseUrl}}/users/{{userId}}/investments
+Authorization: Bearer {{token}}
+
+---
+
+###############################################################################
+# NOTIFICATIONS
+###############################################################################
+
+### Get All Notifications
+GET {{baseUrl}}/notifications
+Authorization: Bearer {{token}}
+
+---
+
+### Get Unread Count (for badge)
+GET {{baseUrl}}/notifications/unread-count
+Authorization: Bearer {{token}}
+
+---
+
+### Mark One Notification as Read
+POST {{baseUrl}}/notifications/{{notificationId}}/read
+Authorization: Bearer {{token}}
+
+---
+
+### Mark All Notifications as Read
+POST {{baseUrl}}/notifications/read-all
+Authorization: Bearer {{token}}
+
+---
+
+### Get Notification Settings
+GET {{baseUrl}}/notifications/settings
+Authorization: Bearer {{token}}
+
+---
+
+### Update Notification Settings
+PUT {{baseUrl}}/notifications/settings
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "investmentAlerts": true,
+  "projectUpdates": true,
+  "systemMessages": true,
+  "emailNotifications": false
+}
+
+---
+
+###############################################################################
+# MEDIA
+###############################################################################
+
+### Upload File (use form-data in Postman or Insomnia for binary files)
+# In VS Code REST Client this is a placeholder — use Postman for actual file upload
+POST {{baseUrl}}/media/upload
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary
+
+------WebKitFormBoundary
+Content-Disposition: form-data; name="file"; filename="image.jpg"
+Content-Type: image/jpeg
+
+< ./test-image.jpg
+------WebKitFormBoundary--
+
+---
+
+### Delete Media File
+DELETE {{baseUrl}}/media/{{mediaId}}
+Authorization: Bearer {{token}}
+
+---
+
+###############################################################################
+# ADMIN — DASHBOARD STATS
+###############################################################################
+
+### Get Platform Statistics
+GET {{baseUrl}}/admin/stats
+Authorization: Bearer {{token}}
+
+---
+
+### Get Chart Data (user growth + revenue + project status breakdown)
+GET {{baseUrl}}/admin/chart-data
+Authorization: Bearer {{token}}
+
+---
+
+### Get Recent Activity Feed (default 10 items)
+GET {{baseUrl}}/admin/recent-activity
+Authorization: Bearer {{token}}
+
+---
+
+### Get Recent Activity Feed (custom count)
+GET {{baseUrl}}/admin/recent-activity?count=25
+Authorization: Bearer {{token}}
+
+---
+
+### Get Activity Logs
+GET {{baseUrl}}/admin/activity-logs
+Authorization: Bearer {{token}}
+
+---
+
+### Get Activity Logs with pagination
+GET {{baseUrl}}/admin/activity-logs?page=1&pageSize=20
+Authorization: Bearer {{token}}
+
+---
+
+###############################################################################
+# ADMIN — USER MANAGEMENT
+###############################################################################
+
+### List All Users
+GET {{baseUrl}}/admin/users
+Authorization: Bearer {{token}}
+
+---
+
+### List Users with filters
+GET {{baseUrl}}/admin/users?search=ahmed&status=active&kycStatus=pending&page=1&pageSize=20
+Authorization: Bearer {{token}}
+
+---
+
+### Update User
+PUT {{baseUrl}}/admin/users/{{userId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Ahmed Ali",
+  "status": "active"
+}
+
+---
+
+### Ban User
+POST {{baseUrl}}/admin/users/{{userId}}/ban
+Authorization: Bearer {{token}}
+
+---
+
+### Suspend User
+POST {{baseUrl}}/admin/users/{{userId}}/suspend
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "reason": "Violation of terms of service"
+}
+
+---
+
+### Unsuspend User
+POST {{baseUrl}}/admin/users/{{userId}}/unsuspend
+Authorization: Bearer {{token}}
+
+---
+
+### Approve KYC
+POST {{baseUrl}}/admin/users/{{userId}}/kyc/approve
+Authorization: Bearer {{token}}
+
+---
+
+### Reject KYC
+POST {{baseUrl}}/admin/users/{{userId}}/kyc/reject
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "reason": "Document is blurry. Please re-submit a clear photo."
+}
+
+---
+
+### Add Funds to User Wallet
+POST {{baseUrl}}/admin/users/{{userId}}/wallet/add
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "amount": 10000,
+  "reason": "Bonus from promotional campaign"
+}
+
+---
+
+###############################################################################
+# ADMIN — PROJECT MANAGEMENT
+###############################################################################
+
+### List All Projects
+GET {{baseUrl}}/admin/projects
+Authorization: Bearer {{token}}
+
+---
+
+### List Projects with filters
+GET {{baseUrl}}/admin/projects?status=pending&page=1&pageSize=20
+Authorization: Bearer {{token}}
+
+---
+
+### Approve Project
+POST {{baseUrl}}/admin/projects/{{projectId}}/approve
+Authorization: Bearer {{token}}
+
+---
+
+### Reject Project
+POST {{baseUrl}}/admin/projects/{{projectId}}/reject
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "reason": "Insufficient documentation provided."
+}
+
+---
+
+### Toggle Featured Status
+PATCH {{baseUrl}}/admin/projects/{{projectId}}/featured
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "isFeatured": true
+}
+
+---
+
+###############################################################################
+# ADMIN — INVESTMENT MANAGEMENT
+###############################################################################
+
+### List All Investments
+GET {{baseUrl}}/admin/investments
+Authorization: Bearer {{token}}
+
+---
+
+### List Investments — filter by status
+GET {{baseUrl}}/admin/investments?status=completed&page=1&pageSize=20
+Authorization: Bearer {{token}}
+
+---
+
+### List Investments — filter by user
+GET {{baseUrl}}/admin/investments?userId={{userId}}&page=1&pageSize=20
+Authorization: Bearer {{token}}
+
+---
+
+### List Investments — filter by project
+GET {{baseUrl}}/admin/investments?projectId={{projectId}}&page=1&pageSize=20
+Authorization: Bearer {{token}}
+
+---
+
+###############################################################################
+# ADMIN — PAYMENT MANAGEMENT
+###############################################################################
+
+### List All Payments
+GET {{baseUrl}}/admin/payments
+Authorization: Bearer {{token}}
+
+---
+
+### List Payments with filters
+GET {{baseUrl}}/admin/payments?status=pending&page=1&pageSize=20
+Authorization: Bearer {{token}}
+
+---
+
+### Approve Payment
+POST {{baseUrl}}/admin/payments/{{paymentId}}/approve
+Authorization: Bearer {{token}}
+
+---
+
+### Reject Payment
+POST {{baseUrl}}/admin/payments/{{paymentId}}/reject
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "reason": "Payment verification failed."
+}
+
+---
+
+### Refund Payment
+POST {{baseUrl}}/admin/payments/{{paymentId}}/refund
+Authorization: Bearer {{token}}
+
+---
+
+### Update Payment Status Manually
+PUT {{baseUrl}}/admin/payments/{{paymentId}}/status
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "status": "completed"
+}
+
+---
+
+###############################################################################
+# ADMIN — WALLET MANAGEMENT
+###############################################################################
+
+### List All Wallets
+GET {{baseUrl}}/admin/wallets
+Authorization: Bearer {{token}}
+
+---
+
+### List Wallets with search
+GET {{baseUrl}}/admin/wallets?search=ahmed
+Authorization: Bearer {{token}}
+
+---
+
+### Transfer Between Wallets
+POST {{baseUrl}}/admin/wallet/transfer
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "fromUserId": "SOURCE_USER_ID_HERE",
+  "toUserId": "TARGET_USER_ID_HERE",
+  "amount": 500,
+  "reason": "Manual correction transfer"
+}
+
+---
+
+###############################################################################
+# ADMIN — NOTIFICATIONS
+###############################################################################
+
+### Send Notification to One User
+POST {{baseUrl}}/admin/notifications/send
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "userId": "{{userId}}",
+  "titleAr": "إشعار مخصص",
+  "titleEn": "Custom Notification",
+  "messageAr": "رسالة مخصصة لك",
+  "messageEn": "This message is just for you",
+  "type": "system"
+}
+
+---
+
+### Broadcast Notification to ALL Users
+POST {{baseUrl}}/admin/notifications/send
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "userId": null,
+  "titleAr": "إعلان للجميع",
+  "titleEn": "Announcement for Everyone",
+  "messageAr": "مرحباً بجميع المستخدمين",
+  "messageEn": "Welcome to all users",
+  "type": "system"
+}
